@@ -6,10 +6,20 @@
 #define LH_ENCODER_A 2
 #define LH_ENCODER_B 4
 
-#define Pwm1 6
-#define Pwm2 9
-#define Dir1 7
-#define Dir2 8
+#define Pwm1a 6
+#define Pwm2a 7
+#define Dir1a 44
+#define Dir2a 49
+
+#define Pwm1b 8
+#define Pwm2b 9
+#define Dir1b 46
+#define Dir2b 51
+
+#define Pwm1c 10
+#define Pwm2c 11
+#define Dir1c 48
+#define Dir2c 47
 
 
 #if (ARDUINO >= 100)
@@ -22,54 +32,30 @@ bool d1,d2;
 
 
 ros::NodeHandle  nh;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 drive::drive_msg rpm_msg;
 ros::Publisher chatter("rpm_drive", &rpm_msg);
 
 
-void servo_cb( const drive::drive_msg & mg)
+void servo_cb( const drive::driv1e_msg & mg)
 {
                 d1=mg.ldir;
                 d2=mg.rdir;
                 //ros::loginfo(mg.lpwm);
-                analogWrite(Pwm1,mg.lpwm);
-                analogWrite(Pwm2,mg.rpwm); 
-                digitalWrite(Dir1,mg.ldir);
-                digitalWrite(Dir2,mg.rdir);      
+                analogWrite(Pwm1a,mg.lpwm);
+                analogWrite(Pwm1b,mg.lpwm);
+                analogWrite(Pwm1c,mg.lpwm);
+                
+                analogWrite(Pwm2a,mg.rpwm);
+                analogWrite(Pwm2b,mg.rpwm);
+                analogWrite(Pwm2c,mg.rpwm); 
+                
+                digitalWrite(Dir1a,mg.ldir);
+                digitalWrite(Dir1b,mg.ldir);
+                digitalWrite(Dir1c,mg.ldir);
+                
+                digitalWrite(Dir2a,mg.rdir);
+                digitalWrite(Dir2b,mg.rdir);
+                digitalWrite(Dir2c,mg.rdir);      
     
 }
 
@@ -132,10 +118,18 @@ void setup() {
   // initialize hardware interrupts
           attachInterrupt(0, leftEncoderEvent, RISING);
           attachInterrupt(1, rightEncoderEvent, RISING);
-          pinMode(Pwm1,OUTPUT);
-          pinMode(Pwm2,OUTPUT);
-          pinMode(Dir1,OUTPUT);
-          pinMode(Dir2,OUTPUT);
+          pinMode(Pwm1a,OUTPUT);
+          pinMode(Pwm2a,OUTPUT);
+          pinMode(Dir1a,OUTPUT);
+          pinMode(Dir2a,OUTPUT);
+          pinMode(Pwm1b,OUTPUT);
+          pinMode(Pwm2b,OUTPUT);
+          pinMode(Dir1b,OUTPUT);
+          pinMode(Dir2b,OUTPUT);
+          pinMode(Pwm1c,OUTPUT);
+          pinMode(Pwm2c,OUTPUT);
+          pinMode(Dir1c,OUTPUT);
+          pinMode(Dir2c,OUTPUT);
 
           nh.initNode();
           nh.subscribe(sub);
