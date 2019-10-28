@@ -9,11 +9,34 @@
 #include <std_msgs/UInt16.h>
 #include <geometry_msgs/Point.h>
 
+#include <SoftwareSerial.h>
+#include <Rhino.h>
+#include <std_msgs/Char.h>
+int x = 0;
+
 ros::NodeHandle  nh;
+Rhino motor1(9,10); 
 
 int pwm1pin = 9, pwm2pin = 11, pwm3pin =12, dir1,dir2, dir3;
 int dirpin1=6, dirpin2=7, dirpin3 = 8;
 int xpotpin = A0, ypotpin = A1, zpotpin = A2; 
+
+void Rhino_cb( const std_msgs::Char & grip_msg){
+  if(grip_msg.data == 'U')
+  {
+      x+=5;
+      if(x<180)
+      
+      motor1.gotoAngleDeg(x);
+      
+  }
+  if(grip_msg.data == 'D')
+  {
+      x-=5;
+      motor1.gotoAngleDeg(x);
+  }
+    
+}
 
 void set_length( const geometry_msgs::Point& cmd_msg)
 {
@@ -87,17 +110,25 @@ void move_arm( const geometry_msgs::Point& cmd_msg)
 
 
 ros::Subscriber<geometry_msgs::Point> sub("robotic_arm", move_arm); //creating a subscriber that subscribes to the topic /robotic_arm
+ros::Subscriber<std_msgs::Char> sub1("gripper_motion", Rhino_cb);
 
 void setup(){
   //setting up pinModes
   pinMode(pwm1pin, OUTPUT);
   pinMode(dirpin1, OUTPUT);
-   pinMode(pwm2pin, OUTPUT);
+  pinMode(pwm2pin, OUTPUT);
   pinMode(dirpin2, OUTPUT);
   pinMode(xpotpin, INPUT);
   pinMode(ypotpin, INPUT);
+  pinMode(13, OUTPUT);
+    
+    delay(2000);
+  
+  motor1.printOutput(1);  // enables Serial printing of function outputs
+  motor1.init();
   nh.initNode(); //initializing the node
   nh.subscribe(sub);
+  nh.subscribe(sub1);
  
 }
 
