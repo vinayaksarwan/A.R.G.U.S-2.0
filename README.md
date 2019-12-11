@@ -5,6 +5,8 @@ The second version of the Mars rover prototype A.R.G.U.S (Autonomous Robotic Gro
 See the arm folder for Arm
 See the drive folder for Drive
 
+copy the two_arduino.launch file in any already built package on jetson. Use this to run rossserial node for two arduinos (for drive and arm) simultaneously.
+
 For cameras. use "sudo apt-get install ros-melodic-usb-cam"
 then "roscd usb_cam/launch"
 "sudo gedit usb_cam-test.launch"
