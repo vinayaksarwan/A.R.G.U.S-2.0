@@ -1,16 +1,16 @@
 # X.L.R 8
 The second version of the Mars rover prototype A.R.G.U.S (Autonomous Robotic Grounded Unmanned Surveillant made by Team Inferno D.T.U (Delhi Technological University).
 
-
+# Arm
 See the arm folder for Arm
 
-
+# Drive
 See the drive folder for Drive
 
-
+# simultaneous Rosserial nodes
 copy the two_arduino.launch file in any already built package on jetson. Use this to run rossserial node for two arduinos (for drive and arm) simultaneously.
 
-
+# Camera
 For cameras. use "sudo apt-get install ros-melodic-usb-cam"
 
 
