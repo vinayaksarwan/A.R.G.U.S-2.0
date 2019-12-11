@@ -1,0 +1,1 @@
+Build this package in workspace. (Delete the ros_lib folder before catkin_make and make sure the custom message drive_msg is created else code won't run.)
