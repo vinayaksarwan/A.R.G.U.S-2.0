@@ -121,7 +121,7 @@ def callback(msg):
 
 def listener():
     rospy.init_node('listener_joy', anonymous=True)
-    rospy.Subscriber("joy", Joy, callback)
+    rospy.Subscriber("joy_for_drive", Joy, callback)
     rospy.spin()
 
 if __name__ == '__main__':

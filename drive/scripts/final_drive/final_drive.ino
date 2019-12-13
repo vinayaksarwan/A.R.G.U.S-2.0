@@ -1,11 +1,11 @@
 #include <ros.h>
 #include <std_msgs/UInt16.h>
 #include <drive/drive_msg.h>
-#define RH_ENCODER_A 3
-#define RH_ENCODER_B 5
-#define LH_ENCODER_A 2
-#define LH_ENCODER_B 4
-
+#include <geometry_msgs/Point.h>
+//#define RH_ENCODER_A 3
+//#define RH_ENCODER_B 5
+//#define LH_ENCODER_A 2
+//#define LH_ENCODER_B 4
 #define Pwm1a 6
 #define Pwm2a 7
 #define Dir1a 44
@@ -32,11 +32,66 @@ bool d1,d2;
 
 
 ros::NodeHandle  nh;
-drive::drive_msg rpm_msg;
-ros::Publisher chatter("rpm_drive", &rpm_msg);
+//drive::drive_msg rpm_msg;
+//ros::Publisher chatter("rpm_drive", &rpm_msg);
+geometry_msgs::Point feedback;
+ros::Publisher chatter("feedback_motor", &feedback);
+int encoder0PinA = 2;   //left orange ->3
+int encoder0PinB = 3;   //left red    ->2
+int encoder1PinA = 18; //right orange ->19
+int encoder1PinB = 19;  //right red   ->18
 
 
-void servo_cb( const drive::driv1e_msg & mg)
+volatile float encoder0Pos = 0;
+volatile int encoder0PinALast = LOW;
+volatile int n = LOW;
+volatile int m = LOW;
+
+volatile float encoder1Pos = 0;
+volatile int encoder1PinALast = LOW;
+volatile int n1 = LOW;
+volatile int m1 = LOW;
+
+unsigned long previousMillis = 0; 
+const long interval = 1200; 
+
+void CountA()
+{
+  n = digitalRead(encoder0PinA); 
+  if ((encoder0PinALast == LOW) && (n == HIGH)) { 
+    if (m == LOW) { 
+      encoder0Pos--; 
+    } 
+    else { 
+      encoder0Pos++; 
+    } 
+  }
+}
+
+void Count1A()
+{
+  n1 = digitalRead(encoder1PinA); 
+  if ((encoder1PinALast == LOW) && (n1 == HIGH)) { 
+    if (m1 == LOW) { 
+      encoder1Pos--; 
+    } 
+    else { 
+      encoder1Pos++; 
+    } 
+  }
+}
+
+void StateB()
+{
+  m = digitalRead(encoder0PinB);
+}
+
+void State1B()
+{
+  m1 = digitalRead(encoder1PinB);
+}
+
+void servo_cb( const drive::drive_msg & mg)
 {
                 d1=mg.ldir;
                 d2=mg.rdir;
@@ -63,17 +118,17 @@ void servo_cb( const drive::driv1e_msg & mg)
 ros::Subscriber<drive::drive_msg> sub("rover_drive", servo_cb);
 
 
-long previousMillis = 0;
-long currentMillis = 0;
+//long previousMillis = 0;
+//long currentMillis = 0;
  
 // variables to store the number of encoder pulses
 // for each motor
-volatile unsigned long leftCount = 0;
-volatile unsigned long rightCount = 0;
+//volatile unsigned long leftCount = 0;
+//volatile unsigned long rightCount = 0;
 
 // encoder event for the interrupt call
 
-void leftEncoderEvent() {
+/*void leftEncoderEvent() {
   if (digitalRead(LH_ENCODER_A) == HIGH) {
     if (digitalRead(LH_ENCODER_B) == LOW) {
       leftCount++;
@@ -105,19 +160,24 @@ void rightEncoderEvent() {
     }
   }
 }
-
-
+*/
 
 void setup() {
           Serial.begin(9600);
-          pinMode(LH_ENCODER_A, INPUT);
-          pinMode(LH_ENCODER_B, INPUT);
-          pinMode(RH_ENCODER_A, INPUT);
-          pinMode(RH_ENCODER_B, INPUT);
-          previousMillis = millis();
+          //pinMode(LH_ENCODER_A, INPUT);
+          //pinMode(LH_ENCODER_B, INPUT);
+          //pinMode(RH_ENCODER_A, INPUT);
+          //pinMode(RH_ENCODER_B, INPUT);
+          //previousMillis = millis();
   // initialize hardware interrupts
-          attachInterrupt(0, leftEncoderEvent, RISING);
-          attachInterrupt(1, rightEncoderEvent, RISING);
+          //attachInterrupt(0, leftEncoderEvent, RISING);
+          //attachInterrupt(1, rightEncoderEvent, RISING);
+          pinMode (encoder0PinA,INPUT); 
+          pinMode (encoder0PinB,INPUT);
+
+          pinMode (encoder1PinA,INPUT); 
+          pinMode (encoder1PinB,INPUT);
+  
           pinMode(Pwm1a,OUTPUT);
           pinMode(Pwm2a,OUTPUT);
           pinMode(Dir1a,OUTPUT);
@@ -130,11 +190,21 @@ void setup() {
           pinMode(Pwm2c,OUTPUT);
           pinMode(Dir1c,OUTPUT);
           pinMode(Dir2c,OUTPUT);
-
+          attachInterrupt(1, CountA, CHANGE);
+          attachInterrupt(0, StateB, FALLING);
+          attachInterrupt(4, Count1A, CHANGE);
+          attachInterrupt(5, State1B, FALLING);
           nh.initNode();
           nh.subscribe(sub);
           nh.advertise(chatter);
 }
+
+float t=0;
+float w=0;
+float dist=0;
+float w1=0;
+float dist1=0;
+
 void loop() {
 
   
@@ -190,11 +260,11 @@ void loop() {
   }*/
   
   
-  delay(1);
-  int interval = 500;
-  currentMillis = millis();
+  //delay(1);
+  //int interval = 500;
+  //currentMillis = millis();
   
-  if(currentMillis - previousMillis > interval)
+  /*if(currentMillis - previousMillis > interval)
   {
     float lRpm = (leftCount/(696.5))*60*2;
     float rRpm = (rightCount/(696.5))*60*2;
@@ -204,7 +274,6 @@ void loop() {
     rpm_msg.rpwm = lRpm;
     rpm_msg.ldir = d1;
     rpm_msg.rdir = d2;
-
     chatter.publish( &rpm_msg );
     
     //Serial.print("Right Count: ");
@@ -216,7 +285,32 @@ void loop() {
     //Serial.println();
     //delay(500);
     previousMillis = currentMillis;
-  }
-
+  }*/
+  unsigned long currentMillis = millis();
+  encoder0PinALast = n;
+  encoder1PinALast = n1;
+  //valNew = encoder0Pos;
+    
+    if(currentMillis - previousMillis >= interval)
+    {
+       previousMillis = currentMillis;
+        dist = (encoder0Pos)/696.5;
+        dist1 = (encoder1Pos)/696.5;
+       //Serial.println(encoder0Pos);
+       //Serial.println(dist);
+        encoder0Pos=0;
+        encoder1Pos=0;
+        //w = 60*dist/interval;
+        //rial.print(",");
+        //Serial.println(dist1);
+       feedback.x=dist;
+       feedback.y=dist1;       
+   
+    }
+    //Serial.println(currentMillis);
+    //Serial.print (m);
+    //Serial.println (".");
+    //valOld = valNew;
+  chatter.publish( &feedback);
   nh.spinOnce(); 
 }

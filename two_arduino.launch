@@ -1,0 +1,6 @@
+<node pkg='rosserial_python' type='serial_node.py' name='arm_arduino_zero' >
+        <param name = "~port" value = "/dev/ttyACM0" />
+</node>
+<node pkg='rosserial_python' type='serial_node.py' name='arduino_one' >
+        <param name = "~port" value = "/dev/ttyACM1" />
+</node>
